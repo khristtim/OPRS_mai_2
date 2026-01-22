@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
 
-#ifndef customH
-#define customH
+#pragma once
 
 #include "model.h"
 
@@ -26,4 +25,4 @@ class TArenstorfModel2 : public TArenstorfModel
         TArenstorfModel2( long double t0, long double t1, long double step );
 };
 //---------------------------------------------------------------------------
-#endif
+

@@ -79,9 +79,7 @@ static inline long double b6_theta(long double theta) {
 
 void TDormandPrinceIntegrator::Run(TModel* Model)
 {
-    // Переключатель: считать ? с множителем h (как в методичке) или без h (как ты просил)
-    // В методичке на стр. 3 формула ? содержит h :contentReference[oaicite:5]{index=5}
-    constexpr bool k_use_h_in_error = false; // <-- поставь true, если нужно строго как в методичке
+    constexpr bool k_use_h_in_error = false; //
 
     long double t = Model->t0();             // текущее время шага интегрирования
     const long double t_end = Model->t1();   // конечное время интегрирования
@@ -115,7 +113,7 @@ void TDormandPrinceIntegrator::Run(TModel* Model)
         h_done = h_new;
         if (t + h_done > t_end) h_done = t_end - t;
 
-        // 2) 7 стадий метода Рунге-Кутты (Дорман-Принс) :contentReference[oaicite:6]{index=6}
+        // 2) 7 стадий метода Рунге-Кутты (Дорман-Принс)
         K[0] = Model->getRight(x, t);
 
         K[1] = Model->getRight(
@@ -148,22 +146,22 @@ void TDormandPrinceIntegrator::Run(TModel* Model)
             t + c[6] * h_done
         );
 
-        // 3) Решения 4-го и 5-го порядка на конце шага :contentReference[oaicite:7]{index=7}
+        // 3) Решения 4-го и 5-го порядка на конце шага
         x4 = x + h_done * (b4[0] * K[0] + b4[1] * K[1] + b4[2] * K[2] +
                            b4[3] * K[3] + b4[4] * K[4] + b4[5] * K[5] + b4[6] * K[6]);
 
         x5 = x + h_done * (b5[0] * K[0] + b5[1] * K[1] + b5[2] * K[2] +
                            b5[3] * K[3] + b5[4] * K[4] + b5[5] * K[5] + b5[6] * K[6]);
 
-        // 4) Оценка относительной вычислительной ошибки ?
+        // 4) Оценка относительной вычислительной ошибки
         const long double roundoff_term = 2.L * u / this->e_max;
 
         long double sum_sq = 0.L;
         for (int i = 0; i < system_dim; ++i)
         {
-            const long double x0_i    = x[(size_t)i];   // x0i (начало шага)
-            const long double x_hat_i = x4[(size_t)i];  // x?i (4-й порядок)
-            const long double x_i     = x5[(size_t)i];  // xi (5-й порядок)
+            const long double x0_i    = x[(size_t)i];
+            const long double x_hat_i = x4[(size_t)i];
+            const long double x_i     = x5[(size_t)i];
 
             const long double denom_i = max(
                 1e-5L,
@@ -173,7 +171,7 @@ void TDormandPrinceIntegrator::Run(TModel* Model)
 
             long double term = (x_hat_i - x_i) / denom_i;
 
-            // В методичке term = h*(x_hat_i - x_i)/denom_i :contentReference[oaicite:10]{index=10}
+
             if constexpr (k_use_h_in_error)
                 term *= h_done;
 
@@ -182,8 +180,7 @@ void TDormandPrinceIntegrator::Run(TModel* Model)
 
         eps_step = sqrtl(sum_sq / (long double)system_dim);
 
-        // 5) Подбор нового шага h_new :contentReference[oaicite:11]{index=11}
-        // h_new = h / max(0.1, min(5, (eps/eps_max)^(1/5) / 0.9))
+        // 5) Подбор нового шага
         const long double ratio = (eps_step <= 0.L) ? 0.L : powl(eps_step / this->e_max, 1.L/5);
         h_new = h_done / max(0.1L, min(5.L, ratio / 0.9L));
 
@@ -191,8 +188,7 @@ void TDormandPrinceIntegrator::Run(TModel* Model)
         if (eps_step > this->e_max)
             continue;
 
-        // 6) Плотная выдача на отрезке [t, t + h_done] :contentReference[oaicite:12]{index=12}
-        // theta = (t_out - t)/h;  x(t_out) ? x(t) + h * ? b_j(theta) * k_j  :contentReference[oaicite:13]{index=13}
+        // 6) Плотная выдача на отрезке [t, t + h_done]
         while ((t_out < t + h_done) && (t_out <= t_end))
         {
             const long double theta = (t_out - t) / h_done;
@@ -211,7 +207,7 @@ void TDormandPrinceIntegrator::Run(TModel* Model)
             t_out += Model->step();
         }
 
-        // 7) Принятие шага: на следующий шаг берём решение 5-го порядка :contentReference[oaicite:14]{index=14}
+        // 7) Принятие шага: на следующий шаг берём решение 5-го порядка
         x = x5;
         t += h_done;
     }

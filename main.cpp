@@ -51,6 +51,8 @@ int main()
     // дополнительно построить графики с интервалом выдачи 1 с
 
     const long double output_step_coarse = 1.0L;
+    delete model_1;
+    delete model_2;
 
     model_1 = new TArenstorfModel(0.0L, 80.0L, output_step_coarse);
     model_2 = new TArenstorfModel2(0.0L, 55.0L, output_step_coarse);
